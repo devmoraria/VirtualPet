@@ -7,30 +7,48 @@ class VirtualPet(val nome: String) {
     var nivelSujeira = 0
     var vontadeBanheiro = 0
     var idade = 0
-    var moedas = 20 // Saldo inicial
+    var moedas = 20
     var jogoAtivo = true
-
+// Deixando mais bonito <3
     fun verificarStatus() {
         val faseDaVida = when {
             idade < 15 -> "Filhote 🐣"
             idade < 35 -> "Adulto 🐕"
-            else -> "Sênior 🐺"
+            else -> "Idoso 🐺"
         }
 
         println("\n=================================================")
-        println("🐾 $nome ($faseDaVida)")
-        println("💰 SALDO ATUAL: $moedas moedas") // Moedas em destaque aqui!
+        println("🐾 $nome ($faseDaVida) | 💰 SALDO: $moedas moedas")
         println("🎂 IDADE: $idade / 50")
-        println("-------------------------------------------------")
-        println("🍗 Fome: $nivelDeFome/100    😊 Felicidade: $nivelFelicidade/100")
-        println("😴 Cansaço: $nivelCansaco/100  🧼 Sujeira: $nivelSujeira/100")
-        println("🚽 Banheiro: $vontadeBanheiro/100")
+
+        if (nivelDeFome >= 80) println("⚠️ ALERTA: $nome está faminto! ($nivelDeFome/100)")
+        else println("🍗 Fome: $nivelDeFome/100")
+
+        if (nivelCansaco >= 80) println("⚠️ ALERTA: $nome está exausto! ($nivelCansaco/100)")
+        else println("😴 Cansaço: $nivelCansaco/100")
+
+        if (nivelFelicidade <= 20) println("⚠️ ALERTA: $nome está ficando deprimido! ($nivelFelicidade/100)")
+        else println("😊 Felicidade: $nivelFelicidade/100")
+
+        println("🧼 Sujeira: $nivelSujeira/100 | 🚽 Banheiro: $vontadeBanheiro/100")
         println("=================================================")
+    }
+
+    // Opção de trabalho
+    fun trabalhar() {
+        println("\n💼 Você foi fazer uns bicos para ganhar dinheiro...")
+        val ganho = Random.nextInt(25, 45)
+        moedas += ganho
+        nivelCansaco += 30
+        nivelDeFome += 15
+        nivelFelicidade -= 10
+        println("💰 Ótimo trabalho! Você recebeu $ganho moedas, mas está cansado e faminto.")
+        validarLimites()
     }
 
     fun comprarEAlimentar() {
         println("\n--- 🛒 LOJA DO PET ---")
-        println("Seu saldo: $moedas moedas") // E aqui também para facilitar a compra!
+        println("Seu saldo: $moedas moedas")
         println("1. Maçã (5 moedas) [-15 Fome]")
         println("2. Ração Premium (15 moedas) [-40 Fome]")
         println("3. Pizza Party (30 moedas) [-60 Fome, +15 Felicidade]")
@@ -56,7 +74,7 @@ class VirtualPet(val nome: String) {
             vontadeBanheiro += (saciedade / 2)
             println("✅ Sucesso! Você gastou $preco moedas. Restam $moedas.")
         } else {
-            println("⚠️ Moedas insuficientes! Você tem apenas $moedas e precisa de $preco.")
+            println("⚠️ Moedas insuficientes!")
         }
         validarLimites()
     }
@@ -65,7 +83,7 @@ class VirtualPet(val nome: String) {
         nivelFelicidade += 20
         nivelCansaco += 25
         nivelSujeira += 15
-        val ganho = Random.nextInt(8, 20) // Aumentei um pouco o ganho
+        val ganho = Random.nextInt(8, 20)
         moedas += ganho
         println("🎾 $nome se divertiu! Você ganhou $ganho moedas.")
         validarLimites()
@@ -89,7 +107,6 @@ class VirtualPet(val nome: String) {
         nivelFelicidade -= 3
         nivelCansaco += 10
 
-        // Eventos aleatórios (10% de chance)
         if (Random.nextInt(1, 11) == 1) {
             val eventos = listOf(
                 "achou uma moeda de 10 no chão! 💰",
@@ -109,11 +126,12 @@ class VirtualPet(val nome: String) {
     }
 
     private fun validarLimites() {
-        nivelDeFome = nivelDeFome.coerceAtLeast(0)
+        // Agora todos os atributos são travados entre 0 e 100 para evitar números negativos ou infinitos
+        nivelDeFome = nivelDeFome.coerceIn(0, 100)
         nivelFelicidade = nivelFelicidade.coerceIn(0, 100)
         nivelCansaco = nivelCansaco.coerceIn(0, 100)
-        nivelSujeira = nivelSujeira.coerceAtLeast(0)
-        vontadeBanheiro = vontadeBanheiro.coerceAtLeast(0)
+        nivelSujeira = nivelSujeira.coerceIn(0, 100)
+        vontadeBanheiro = vontadeBanheiro.coerceIn(0, 100)
 
         if (idade >= 50) {
             println("\n🏆 VITÓRIA! $nome atingiu a idade máxima com saúde!")
@@ -132,9 +150,9 @@ fun main() {
 
     while (pet.jogoAtivo) {
         println("\nO que deseja fazer?")
-        println("1. Alimentar/Loja | 2. Brincar (Ganha Moedas) | 3. Dormir")
-        println("4. Banheiro       | 5. Banho                | 6. Status")
-        println("7. Sair")
+        println("1. Alimentar/Loja | 2. Brincar | 3. Dormir")
+        println("4. Banheiro       | 5. Banho   | 6. Status")
+        println("7. TRABALHAR 💰   | 8. Sair")
         print(">> ")
 
         when (readln()) {
@@ -144,7 +162,8 @@ fun main() {
             "4" -> pet.levarAoBanheiro()
             "5" -> pet.darBanho()
             "6" -> pet.verificarStatus()
-            "7" -> return
+            "7" -> pet.trabalhar()
+            "8" -> return
             else -> println("Opção inexistente!")
         }
         if (pet.jogoAtivo) pet.passarTempo()
